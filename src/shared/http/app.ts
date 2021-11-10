@@ -1,23 +1,15 @@
 import 'reflect-metadata';
 import express, { Response, Request, NextFunction } from 'express';
 import cors from 'cors';
+import { router } from './routes';
+import { AppError } from '@shared/errors/ApeError';
 
 const app = express();
 
 app.use(cors());
 
-app.use((error: Error, request: Request, response: Response, next: NextFunction) => {
-    if(error instanceof Error){
-        return response.status(400).json({
-            error: error.message
-        })
-    }
-
-    return response.status(500).json({
-        status: "error",
-        message: "Internal Server Error"
-    })
-});
+app.use(express.json());
+app.use(router)
 
 app.use(function(request: Request, response: Response, next: NextFunction) {
     response.header("Access-Control-Allow-Origin", "*");
@@ -26,6 +18,18 @@ app.use(function(request: Request, response: Response, next: NextFunction) {
     next();
 });
 
-app.use(express.json());
+app.use((error: Error, request: Request, response: Response, next: NextFunction) => {
+    if(error instanceof AppError){
+        return response.status(error.statusCode).json({
+            status: 'error',
+            message: error.message,
+        })
+    }
+
+    return response.status(500).json({
+        status: "error",
+        message: "Internal Server Error"
+    })
+});
 
 export { app }
