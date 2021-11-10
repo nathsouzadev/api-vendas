@@ -1,4 +1,4 @@
-import { app } from './app';
+import { app } from './shared/http/app';
 
 console.log(process.env.NODE_ENV)
 
